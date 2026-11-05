@@ -1,0 +1,30 @@
+CREATE DATABASE IF NOT EXISTS lostlink CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE lostlink;
+CREATE TABLE IF NOT EXISTS users (
+ id INT AUTO_INCREMENT PRIMARY KEY, full_name VARCHAR(120) NOT NULL,
+ email VARCHAR(190) NOT NULL UNIQUE, password_hash VARCHAR(255) NOT NULL,
+ role ENUM('student','staff','admin') NOT NULL DEFAULT 'student',
+ created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS items (
+ id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL,
+ report_type ENUM('lost','found') NOT NULL, item_name VARCHAR(120) NOT NULL,
+ category VARCHAR(80) NOT NULL, description TEXT NOT NULL, location VARCHAR(180) NOT NULL,
+ incident_date DATE NOT NULL, image_filename VARCHAR(255),
+ status ENUM('published','claimed','returned','closed') NOT NULL DEFAULT 'published',
+ created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+ FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS claims (
+ id INT AUTO_INCREMENT PRIMARY KEY, item_id INT NOT NULL, claimant_id INT NOT NULL,
+ ownership_details TEXT NOT NULL,
+ status ENUM('pending','approved','rejected') NOT NULL DEFAULT 'pending',
+ created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+ FOREIGN KEY(item_id) REFERENCES items(id) ON DELETE CASCADE,
+ FOREIGN KEY(claimant_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS notifications (
+ id INT AUTO_INCREMENT PRIMARY KEY, user_id INT NOT NULL, message VARCHAR(255) NOT NULL,
+ is_read BOOLEAN NOT NULL DEFAULT FALSE, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+ FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+);
